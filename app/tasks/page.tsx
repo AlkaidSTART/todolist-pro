@@ -339,7 +339,8 @@ export default function KanbanPage() {
   };
 
   return (
-    <div className="page-kanban-bg flex flex-col gap-12 max-w-full mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000 lg:pr-16">
+    <div className="relative isolate flex flex-col gap-12 max-w-full mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000 lg:pr-16">
+      <div className="page-background page-background--kanban" aria-hidden="true" />
       <header className="space-y-6">
         <div className="rounded-[2rem] border border-white/65 bg-white/55 px-6 py-5 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,24,27,0.08)]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">

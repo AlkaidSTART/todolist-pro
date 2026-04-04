@@ -137,7 +137,8 @@ export default function TaskForm({ mode, taskId }: TaskFormProps) {
   };
 
   return (
-    <div className="page-form-bg flex flex-col gap-10 max-w-3xl w-full pt-8 pb-32 min-h-screen">
+    <div className="relative isolate flex flex-col gap-10 max-w-3xl w-full pt-8 pb-32 min-h-screen">
+      <div className="page-background page-background--form" aria-hidden="true" />
       <header className="rounded-[2rem] border border-white/65 bg-white/55 px-6 py-6 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,24,27,0.08)] sm:px-8">
         <Link
           href="/tasks"

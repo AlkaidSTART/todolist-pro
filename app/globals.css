@@ -67,38 +67,39 @@ body::after {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1));
 }
 
-.page-overview-bg {
-  background:
+.page-background {
+  position: fixed;
+  inset: 0;
+  z-index: -5;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.page-background--overview {
+  background-image:
     radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--theme-accent-soft) 18%, transparent), transparent 36%),
     radial-gradient(circle at 84% 82%, color-mix(in srgb, var(--theme-bg-end) 52%, transparent), transparent 38%),
     linear-gradient(140deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.34));
-  border-radius: 2rem;
-  padding: 1rem;
 }
 
-.page-kanban-bg {
-  background:
-    radial-gradient(circle at 88% 10%, color-mix(in srgb, var(--theme-accent-soft) 20%, transparent), transparent 34%),
-    radial-gradient(circle at 14% 76%, color-mix(in srgb, var(--theme-bg-start) 62%, transparent), transparent 40%),
-    linear-gradient(150deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.3));
-  border-radius: 2rem;
-  padding: 1rem;
+.page-background--kanban {
+  background-image:
+    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--theme-accent-soft) 16%, transparent), transparent 36%),
+    radial-gradient(circle at 84% 82%, color-mix(in srgb, var(--theme-bg-start) 48%, transparent), transparent 38%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.32));
 }
 
-.page-settings-bg {
-  background:
-    radial-gradient(circle at 84% 12%, color-mix(in srgb, var(--theme-accent-soft) 18%, transparent), transparent 36%),
-    radial-gradient(circle at 20% 78%, color-mix(in srgb, var(--theme-bg-end) 48%, transparent), transparent 42%),
-    linear-gradient(155deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.28));
-  border-radius: 2rem;
-  padding: 1rem;
+.page-background--settings {
+  background-image:
+    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--theme-accent-soft) 18%, transparent), transparent 36%),
+    radial-gradient(circle at 84% 82%, color-mix(in srgb, var(--theme-bg-end) 52%, transparent), transparent 38%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.34));
 }
 
-.page-form-bg {
-  background:
-    radial-gradient(circle at 16% 16%, color-mix(in srgb, var(--theme-accent-soft) 16%, transparent), transparent 34%),
-    radial-gradient(circle at 82% 84%, color-mix(in srgb, var(--theme-bg-start) 60%, transparent), transparent 42%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.28));
-  border-radius: 2rem;
-  padding: 1rem;
+.page-background--form {
+  background-image:
+    radial-gradient(circle at 12% 14%, color-mix(in srgb, var(--theme-accent-soft) 14%, transparent), transparent 36%),
+    radial-gradient(circle at 84% 82%, color-mix(in srgb, var(--theme-bg-end) 44%, transparent), transparent 38%),
+    linear-gradient(140deg, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0.3));
 }

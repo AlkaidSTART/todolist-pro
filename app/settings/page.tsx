@@ -22,7 +22,8 @@ export default function SettingsPage() {
   const setPrivacy = useAppStore((state) => state.setPrivacy);
 
   return (
-    <div className="page-settings-bg flex flex-col gap-12 max-w-3xl w-full pt-8 pb-32 min-h-screen animate-in slide-in-from-bottom-4 duration-700">
+    <div className="relative isolate flex flex-col gap-12 max-w-3xl w-full pt-8 pb-32 min-h-screen animate-in slide-in-from-bottom-4 duration-700">
+      <div className="page-background page-background--settings" aria-hidden="true" />
       <header className="flex items-end justify-between border-b border-zinc-200/50 pb-8">
         <div>
           <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">

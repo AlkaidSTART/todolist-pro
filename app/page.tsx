@@ -39,7 +39,8 @@ export default function OverviewPage() {
   const focusTask = tasks.find((task) => task.status !== "done") ?? tasks[0];
 
   return (
-    <div className="page-overview-bg flex flex-col gap-10 lg:gap-12 lg:pr-16 max-w-5xl mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000">
+    <div className="relative isolate flex flex-col gap-10 lg:gap-12 lg:pr-16 max-w-5xl mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000">
+      <div className="page-background page-background--overview" aria-hidden="true" />
       <header className="rounded-[2rem] border border-zinc-200/70 bg-[linear-gradient(125deg,rgba(255,255,255,0.92),rgba(244,244,245,0.62))] px-6 py-6 shadow-[0_24px_80px_rgba(24,24,27,0.08)] sm:px-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
