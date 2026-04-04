@@ -18,42 +18,52 @@ export type ThemePaletteName =
   | "sand"
   | "violet";
 
-export type TaskDraft = {
+export interface TaskDraft {
   title: string;
   description: string;
   priority: TaskPriority;
   dueDate: string;
-};
+}
 
-export type Task = TaskDraft & {
+export interface Task extends TaskDraft {
   id: string;
   status: TaskStatus;
   startedAt?: number;
   completedAt?: number;
   deletedAt?: number;
-};
+}
 
-export type UserSettings = {
+export interface NotificationSettings {
+  email: boolean;
+  push: boolean;
+  sms: boolean;
+}
+
+export interface PrivacySettings {
+  telemetry: boolean;
+  shareData: boolean;
+}
+
+export interface UserSettings {
   theme: ThemeMode;
   palette: ThemePaletteName;
-  notifications: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-  };
-  privacy: {
-    telemetry: boolean;
-    shareData: boolean;
-  };
-};
+  notifications: NotificationSettings;
+  privacy: PrivacySettings;
+}
 
-export type ThemePaletteTokens = {
+export interface ThemePaletteTokens {
   accent: string;
   accentSoft: string;
   bgStart: string;
   bgEnd: string;
   surface: string;
-};
+}
+
+export type StoreUpdater<T extends object> = Partial<T> | ((prev: T) => Partial<T>);
+
+type SettingsObjectKey = {
+  [K in keyof UserSettings]-?: UserSettings[K] extends object ? K : never;
+}[keyof UserSettings];
 
 export const themePaletteNames = [
   "graphite",
@@ -196,21 +206,24 @@ const defaultSettings: UserSettings = {
   },
 };
 
-type DragState = {
+export interface DragState {
   activeTaskId: string | null;
-};
+}
 
-type AppState = {
+export interface AppStateData {
   tasks: Task[];
   deletedTasks: Task[];
   taskDraft: TaskDraft;
   settings: UserSettings;
   drag: DragState;
+}
+
+export interface AppStateActions {
   setTheme: (theme: ThemeMode) => void;
   setPalette: (palette: ThemePaletteName) => void;
-  setNotifications: (updates: Partial<UserSettings["notifications"]>) => void;
-  setPrivacy: (updates: Partial<UserSettings["privacy"]>) => void;
-  setTaskDraft: (updates: Partial<TaskDraft>) => void;
+  setNotifications: (updates: StoreUpdater<NotificationSettings>) => void;
+  setPrivacy: (updates: StoreUpdater<PrivacySettings>) => void;
+  setTaskDraft: (updates: StoreUpdater<TaskDraft>) => void;
   loadTaskDraft: (taskId?: string) => void;
   resetTaskDraft: () => void;
   createTask: () => string;
@@ -222,7 +235,35 @@ type AppState = {
   permanentlyDeleteTask: (taskId: string) => void;
   startDragging: (taskId: string) => void;
   endDragging: () => void;
-};
+}
+
+export type AppState = AppStateData & AppStateActions;
+
+export type PersistedAppState = Pick<AppStateData, "tasks" | "deletedTasks" | "settings">;
+
+export type AppSelector<TSelected> = (state: AppState) => TSelected;
+
+export const createAppSelector = <TSelected>(selector: AppSelector<TSelected>) => selector;
+
+const resolveUpdater = <T extends object>(prev: T, updates: StoreUpdater<T>): T => ({
+  ...prev,
+  ...(typeof updates === "function" ? updates(prev) : updates),
+});
+
+const updateSettingsSlice = <K extends SettingsObjectKey>(
+  state: AppStateData,
+  key: K,
+  updates: StoreUpdater<UserSettings[K]>
+): UserSettings => ({
+  ...state.settings,
+  [key]: resolveUpdater(state.settings[key], updates),
+});
+
+const partializeState = (state: AppState): PersistedAppState => ({
+  tasks: state.tasks,
+  deletedTasks: state.deletedTasks,
+  settings: state.settings,
+});
 
 const applyStatusTimestamps = (task: Task, status: TaskStatus): Task => {
   if (status === "in-progress") {
@@ -289,30 +330,15 @@ export const useAppStore = create<AppState>()(
         })),
       setNotifications: (updates) =>
         set((state) => ({
-          settings: {
-            ...state.settings,
-            notifications: {
-              ...state.settings.notifications,
-              ...updates,
-            },
-          },
+          settings: updateSettingsSlice(state, "notifications", updates),
         })),
       setPrivacy: (updates) =>
         set((state) => ({
-          settings: {
-            ...state.settings,
-            privacy: {
-              ...state.settings.privacy,
-              ...updates,
-            },
-          },
+          settings: updateSettingsSlice(state, "privacy", updates),
         })),
       setTaskDraft: (updates) =>
         set((state) => ({
-          taskDraft: {
-            ...state.taskDraft,
-            ...updates,
-          },
+          taskDraft: resolveUpdater(state.taskDraft, updates),
         })),
       loadTaskDraft: (taskId) => {
         if (!taskId) {
@@ -444,11 +470,7 @@ export const useAppStore = create<AppState>()(
     {
       name: "todolist-pro-state",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        tasks: state.tasks,
-        deletedTasks: state.deletedTasks,
-        settings: state.settings,
-      }),
+      partialize: partializeState,
     }
   )
 );
