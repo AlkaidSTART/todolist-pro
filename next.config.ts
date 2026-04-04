@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'export',
+  distDir: 'dist',
+  basePath: '/todolist-pro',
+  assetPrefix: '/todolist-pro/',
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
