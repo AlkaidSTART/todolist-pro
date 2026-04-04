@@ -30,6 +30,7 @@ export type Task = TaskDraft & {
   status: TaskStatus;
   startedAt?: number;
   completedAt?: number;
+  deletedAt?: number;
 };
 
 export type UserSettings = {
@@ -201,6 +202,7 @@ type DragState = {
 
 type AppState = {
   tasks: Task[];
+  deletedTasks: Task[];
   taskDraft: TaskDraft;
   settings: UserSettings;
   drag: DragState;
@@ -215,6 +217,9 @@ type AppState = {
   updateTask: (taskId: string) => void;
   moveTaskToTask: (activeTaskId: string, overTaskId: string) => void;
   moveTaskToStatus: (activeTaskId: string, status: TaskStatus) => void;
+  moveTaskToTrash: (taskId: string) => void;
+  restoreTaskFromTrash: (taskId: string) => void;
+  permanentlyDeleteTask: (taskId: string) => void;
   startDragging: (taskId: string) => void;
   endDragging: () => void;
 };
@@ -245,10 +250,26 @@ const applyStatusTimestamps = (task: Task, status: TaskStatus): Task => {
   };
 };
 
+const insertTaskByStatus = (tasks: Task[], task: Task): Task[] => {
+  const nextTasks = tasks.filter((item) => item.id !== task.id);
+
+  let insertIndex = nextTasks.length;
+  for (let index = nextTasks.length - 1; index >= 0; index -= 1) {
+    if (nextTasks[index].status === task.status) {
+      insertIndex = index + 1;
+      break;
+    }
+  }
+
+  nextTasks.splice(insertIndex, 0, task);
+  return nextTasks;
+};
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       tasks: initialTasks,
+      deletedTasks: [],
       taskDraft: createTaskDraft(),
       settings: defaultSettings,
       drag: { activeTaskId: null },
@@ -371,23 +392,52 @@ export const useAppStore = create<AppState>()(
             return state;
           }
 
-          const nextTasks = state.tasks.filter((task) => task.id !== activeTaskId);
           const movedTask = applyStatusTimestamps(activeTask, status);
 
-          let insertIndex = nextTasks.length;
-          for (let index = nextTasks.length - 1; index >= 0; index -= 1) {
-            if (nextTasks[index].status === status) {
-              insertIndex = index + 1;
-              break;
-            }
-          }
-
-          nextTasks.splice(insertIndex, 0, movedTask);
-
           return {
-            tasks: nextTasks,
+            tasks: insertTaskByStatus(state.tasks, movedTask),
           };
         }),
+      moveTaskToTrash: (taskId) =>
+        set((state) => {
+          const task = state.tasks.find((item) => item.id === taskId);
+
+          if (!task) {
+            return state;
+          }
+
+          const deletedTask = {
+            ...task,
+            deletedAt: Date.now(),
+          };
+
+          return {
+            tasks: state.tasks.filter((item) => item.id !== taskId),
+            deletedTasks: [deletedTask, ...state.deletedTasks.filter((item) => item.id !== taskId)],
+          };
+        }),
+      restoreTaskFromTrash: (taskId) =>
+        set((state) => {
+          const deletedTask = state.deletedTasks.find((item) => item.id === taskId);
+
+          if (!deletedTask) {
+            return state;
+          }
+
+          const restoredTask = {
+            ...deletedTask,
+            deletedAt: undefined,
+          };
+
+          return {
+            tasks: insertTaskByStatus(state.tasks, restoredTask),
+            deletedTasks: state.deletedTasks.filter((item) => item.id !== taskId),
+          };
+        }),
+      permanentlyDeleteTask: (taskId) =>
+        set((state) => ({
+          deletedTasks: state.deletedTasks.filter((item) => item.id !== taskId),
+        })),
       startDragging: (taskId) => set({ drag: { activeTaskId: taskId } }),
       endDragging: () => set({ drag: { activeTaskId: null } }),
     }),
@@ -396,6 +446,7 @@ export const useAppStore = create<AppState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         tasks: state.tasks,
+        deletedTasks: state.deletedTasks,
         settings: state.settings,
       }),
     }

@@ -2,6 +2,18 @@
 
 import { useAppStore, themePaletteNames, themePalettes } from "@/lib/app-store";
 
+const paletteLabels: Record<(typeof themePaletteNames)[number], string> = {
+  graphite: "石墨",
+  teal: "青绿",
+  amber: "琥珀",
+  coral: "珊瑚",
+  sky: "晴空",
+  emerald: "森绿",
+  rose: "玫瑰",
+  sand: "沙砾",
+  violet: "紫罗兰",
+};
+
 export default function SettingsPage() {
   const settings = useAppStore((state) => state.settings);
   const setTheme = useAppStore((state) => state.setTheme);
@@ -10,7 +22,7 @@ export default function SettingsPage() {
   const setPrivacy = useAppStore((state) => state.setPrivacy);
 
   return (
-    <div className="flex flex-col gap-12 max-w-3xl w-full pt-8 pb-32 min-h-screen animate-in slide-in-from-bottom-4 duration-700">
+    <div className="page-settings-bg flex flex-col gap-12 max-w-3xl w-full pt-8 pb-32 min-h-screen animate-in slide-in-from-bottom-4 duration-700">
       <header className="flex items-end justify-between border-b border-zinc-200/50 pb-8">
         <div>
           <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
@@ -44,7 +56,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Notifications */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 items-start">
           <div className="space-y-2">
             <h2 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-800">通知</h2>
@@ -72,7 +83,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Privacy */}
         <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 items-start">
           <div className="space-y-2">
             <h2 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-800">隐私</h2>
@@ -112,7 +122,7 @@ export default function SettingsPage() {
             <p className="text-sm font-light text-zinc-500">切换应用主色与背景氛围，动效由 GSAP 驱动。</p>
           </div>
           <div className="rounded-3xl border border-zinc-100 p-5 bg-white/60 backdrop-blur-md">
-            <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {themePaletteNames.map((name) => {
                 const palette = themePalettes[name];
                 const active = settings.palette === name;
@@ -124,7 +134,7 @@ export default function SettingsPage() {
                       setPalette(name);
                     }}
                     className={`rounded-2xl border px-3 py-3 text-left transition-all duration-300 ${
-                      active ? "border-zinc-300 shadow-md" : "border-zinc-200/70 hover:border-zinc-300"
+                      active ? "border-zinc-300 bg-white shadow-md" : "border-zinc-200/70 bg-white/80 hover:border-zinc-300"
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-3">
@@ -132,7 +142,7 @@ export default function SettingsPage() {
                       <span className="w-3 h-3 rounded-full" style={{ backgroundColor: palette.accentSoft }} />
                     </div>
                     <div className="text-[11px] uppercase tracking-[0.16em] font-semibold text-zinc-600">
-                      {name === "graphite" ? "石墨" : name === "teal" ? "青绿" : "琥珀"}
+                      {paletteLabels[name]}
                     </div>
                   </button>
                 );

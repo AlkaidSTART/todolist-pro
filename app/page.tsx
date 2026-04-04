@@ -1,111 +1,158 @@
-import React from "react";
+"use client";
 
-// Index Signature: Defining an object structure where keys are dynamic (categories).
-type CategoryStats = {
-  [categoryName: string]: {
-    total: number;
-    completed: number;
-  };
+import React, { useMemo } from "react";
+import { useAppStore, type TaskStatus } from "@/lib/app-store";
+
+const statusMeta: Record<TaskStatus, { label: string; tone: string }> = {
+  todo: { label: "待处理", tone: "bg-amber-50 text-amber-700 border-amber-200" },
+  "in-progress": { label: "进行中", tone: "bg-sky-50 text-sky-700 border-sky-200" },
+  done: { label: "已完成", tone: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 };
 
-type Task = {
-  id: string;
-  title: string;
-  category: string;
-  completed: boolean;
-};
-
-// Mock data
-const mockTasks: Task[] = [
-  { id: "1", title: "评审 Q3 路线图", category: "工作", completed: true },
-  { id: "2", title: "完善设计系统变量", category: "工作", completed: false },
-  { id: "3", title: "本周采购清单", category: "生活", completed: true },
-  { id: "4", title: "晚间训练计划", category: "健康", completed: false },
-  { id: "5", title: "阅读《架构整洁之道》", category: "生活", completed: false },
-];
+const priorityLabels = {
+  low: "低",
+  medium: "中",
+  high: "高",
+} as const;
 
 export default function OverviewPage() {
-  // Array Processing: using '.reduce' to aggregate task statistics dynamically.
-  const stats: CategoryStats = mockTasks.reduce((acc, task) => {
-    if (!acc[task.category]) {
-      acc[task.category] = { total: 0, completed: 0 };
-    }
-    acc[task.category].total += 1;
-    if (task.completed) {
-      acc[task.category].completed += 1;
-    }
-    return acc;
-  }, {} as CategoryStats);
+  const tasks = useAppStore((state) => state.tasks);
 
-  const categories = Object.keys(stats);
+  const stats = useMemo(
+    () =>
+      (Object.keys(statusMeta) as TaskStatus[]).map((status) => {
+        const list = tasks.filter((task) => task.status === status);
+        return {
+          status,
+          label: statusMeta[status].label,
+          tone: statusMeta[status].tone,
+          count: list.length,
+          list: list.slice(0, 3),
+        };
+      }),
+    [tasks]
+  );
+
+  const totalTasks = tasks.length;
+  const doneTasks = tasks.filter((task) => task.status === "done").length;
+  const progress = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+  const focusTask = tasks.find((task) => task.status !== "done") ?? tasks[0];
 
   return (
-    <div className="flex flex-col gap-12 sm:gap-16 lg:pr-16 max-w-4xl mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000">
-      <header className="space-y-4">
-        <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
-          总览
-        </h1>
-        <p className="text-zinc-500 font-light text-lg">
-          用一眼可读的方式，掌握当日任务进展。
-        </p>
-      </header>
+    <div className="page-overview-bg flex flex-col gap-10 lg:gap-12 lg:pr-16 max-w-5xl mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000">
+      <header className="rounded-[2rem] border border-zinc-200/70 bg-[linear-gradient(125deg,rgba(255,255,255,0.92),rgba(244,244,245,0.62))] px-6 py-6 shadow-[0_24px_80px_rgba(24,24,27,0.08)] sm:px-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50/90 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-500">
+              总览面板
+            </div>
+            <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">总览</h1>
+            <p className="max-w-2xl text-zinc-500 font-light text-lg">
+              把分散的任务收拢到一个沉浸式画布里，进度、状态和当前焦点都在同一个视野内。
+            </p>
+          </div>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categories.map((category) => {
-          const { total, completed } = stats[category];
-          const progress = Math.round((completed / total) * 100);
-
-          return (
-            <div
-              key={category}
-              className="p-8 border border-zinc-200/60 bg-white/40 ring-1 ring-zinc-100 backdrop-blur-md hover:border-zinc-300 hover:shadow-2xl hover:shadow-zinc-200/50 transition-all duration-700 ease-out rounded-3xl group flex flex-col justify-between"
-            >
-              <h2 className="text-lg font-medium tracking-wide text-zinc-800 uppercase text-xs mb-8">
-                {category}
-              </h2>
-              <div>
-                <div className="flex items-end justify-between mb-4">
-                  <span className="text-4xl font-light tabular-nums text-zinc-800">
-                    {progress}%
-                  </span>
-                  <span className="text-[10px] text-zinc-400 font-mono uppercase tracking-[0.2em] mb-1">
-                    {completed} / {total}
-                  </span>
-                </div>
-                <div className="h-[2px] bg-zinc-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-zinc-900 transition-all duration-[1.5s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:bg-black"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:min-w-[26rem]">
+            <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">总任务</div>
+              <div className="mt-2 text-2xl font-light tabular-nums text-zinc-900">{totalTasks}</div>
+            </div>
+            <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">完成率</div>
+              <div className="mt-2 text-2xl font-light tabular-nums text-zinc-900">{progress}%</div>
+            </div>
+            <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">进行中</div>
+              <div className="mt-2 text-2xl font-light tabular-nums text-zinc-900">
+                {stats.find((item) => item.status === "in-progress")?.count ?? 0}
               </div>
             </div>
-          );
-        })}
+            <div className="rounded-2xl border border-zinc-200 bg-white/80 p-4">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">待处理</div>
+              <div className="mt-2 text-2xl font-light tabular-nums text-zinc-900">
+                {stats.find((item) => item.status === "todo")?.count ?? 0}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {focusTask ? (
+          <div className="mt-6 rounded-3xl border-l-4 border-l-zinc-800 border-zinc-200 bg-[linear-gradient(90deg,rgba(255,255,255,0.92),rgba(255,255,255,0.58))] p-5">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">当前焦点</div>
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
+                {statusMeta[focusTask.status].label}
+              </span>
+              <span className="text-zinc-700 font-light">{focusTask.title}</span>
+            </div>
+          </div>
+        ) : null}
+      </header>
+
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {stats.map((item) => (
+          <article
+            key={item.status}
+            className="rounded-[1.6rem] border border-zinc-200 bg-[linear-gradient(160deg,rgba(255,255,255,0.94),rgba(250,250,251,0.76))] p-6 shadow-[0_18px_50px_rgba(24,24,27,0.05)]"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${item.tone}`}>
+                  {item.label}
+                </div>
+                <div className="mt-4 text-4xl font-light tabular-nums text-zinc-900">{item.count}</div>
+              </div>
+              <div className="text-right text-[10px] uppercase tracking-[0.2em] text-zinc-400">
+                <div>任务</div>
+                <div className="mt-1">{item.label}</div>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-2">
+              {item.list.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-zinc-200 bg-white/60 p-4 text-sm text-zinc-400">
+                  当前没有任务。
+                </div>
+              ) : (
+                item.list.map((task) => (
+                  <div
+                    key={task.id}
+                    className="rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-3 text-sm text-zinc-700"
+                  >
+                    {task.title}
+                  </div>
+                ))
+              )}
+            </div>
+          </article>
+        ))}
       </section>
 
-      {/* Array Processing: Filtering and Mapping */}
-      <section className="mt-12">
-        <h3 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-400 mb-6">
-          待办聚焦
-        </h3>
-        <ul className="flex flex-col gap-1">
-          {mockTasks
-            .filter((t) => !t.completed)
+      <section className="rounded-[1.8rem] border border-zinc-200 bg-[linear-gradient(160deg,rgba(255,255,255,0.92),rgba(246,246,247,0.74))] p-6">
+        <h3 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-400 mb-6">待办聚焦</h3>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {tasks
+            .filter((task) => task.status !== "done")
+            .slice(0, 6)
             .map((task) => (
-              <li
-                 key={task.id}
-                 className="flex items-center justify-between p-5 rounded-2xl border border-transparent hover:border-zinc-200/60 hover:bg-white/60 transition-all duration-300 group cursor-default"
+              <div
+                key={task.id}
+                className="flex items-center justify-between gap-4 rounded-2xl border border-zinc-200/70 bg-white/80 px-4 py-4"
               >
-                <span className="text-zinc-600 font-light group-hover:text-zinc-900 transition-colors">
-                  {task.title}
+                <div className="min-w-0">
+                  <div className="truncate text-zinc-700 font-light">{task.title}</div>
+                  <div className="mt-2 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+                    <span>{statusMeta[task.status].label}</span>
+                    <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                    <span>{priorityLabels[task.priority]}</span>
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full border border-zinc-200 bg-zinc-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  聚焦
                 </span>
-                <span className="text-[10px] font-mono uppercase tracking-[0.1em] px-3 py-1 rounded-full bg-zinc-100 text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-colors duration-300">
-                  {task.category}
-                </span>
-              </li>
+              </div>
             ))}
-        </ul>
+        </div>
       </section>
     </div>
   );

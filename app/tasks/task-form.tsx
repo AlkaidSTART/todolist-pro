@@ -137,8 +137,8 @@ export default function TaskForm({ mode, taskId }: TaskFormProps) {
   };
 
   return (
-    <div className="flex flex-col gap-12 max-w-2xl w-full pt-8 pb-32 min-h-screen">
-      <header className="space-y-4">
+    <div className="page-form-bg flex flex-col gap-10 max-w-3xl w-full pt-8 pb-32 min-h-screen">
+      <header className="rounded-[2rem] border border-white/65 bg-white/55 px-6 py-6 backdrop-blur-2xl shadow-[0_24px_80px_rgba(24,24,27,0.08)] sm:px-8">
         <Link
           href="/tasks"
           className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-800 transition-colors inline-block mb-8"
@@ -153,13 +153,13 @@ export default function TaskForm({ mode, taskId }: TaskFormProps) {
             任务 ID: {taskId}
           </p>
         ) : (
-          <p className="text-zinc-500 font-light text-lg">新建任务并直接写入全局状态。</p>
+          <p className="text-zinc-500 font-light text-lg">新建任务会直接写入全局状态，并和看板同步。</p>
         )}
       </header>
 
       <form
         onSubmit={handleSave}
-        className="space-y-8 bg-white p-8 sm:p-12 rounded-[2rem] border border-zinc-100 shadow-2xl shadow-zinc-200/20"
+        className="space-y-8 rounded-[2rem] border border-zinc-200/70 bg-white/70 p-8 shadow-[0_24px_80px_rgba(24,24,27,0.08)] backdrop-blur-2xl sm:p-12"
       >
         <Field<string>
           label="标题"
