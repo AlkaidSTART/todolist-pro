@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import {
   DndContext,
   DragOverlay,
   closestCenter,
+  DragEndEvent,
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
   TouchSensor,
+  useDroppable,
   useSensor,
   useSensors,
-  DragEndEvent,
 } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -23,32 +23,31 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import gsap from "gsap";
+import { useAppStore, type Task, type TaskStatus } from "@/lib/app-store";
 
-// Discriminated Unions & Type Guards
-type BaseTask = {
-  id: string;
-  title: string;
-};
-
-export type TodoTask = BaseTask & { status: "todo" };
-export type InProgressTask = BaseTask & { status: "in-progress"; startedAt: number };
-export type DoneTask = BaseTask & { status: "done"; completedAt: number };
-
-export type KanbanTask = TodoTask | InProgressTask | DoneTask;
-
-// Type Guard
-export const isDoneTask = (task: KanbanTask): task is DoneTask => {
-  return task.status === "done";
-};
-
-const initialTasks: KanbanTask[] = [
-  { id: "t1", title: "定义品牌视觉结构", status: "todo" },
-  { id: "t2", title: "校验对比度可读性", status: "todo" },
-  { id: "t3", title: "实现登录鉴权流程", status: "in-progress", startedAt: Date.now() },
-  { id: "t4", title: "微调标题排印系统", status: "done", completedAt: Date.now() - 86400000 },
+const columns: Array<{ label: string; status: TaskStatus }> = [
+  { label: "待处理", status: "todo" },
+  { label: "进行中", status: "in-progress" },
+  { label: "已完成", status: "done" },
 ];
 
-function SortableItem({ task }: { task: KanbanTask }) {
+const statusLabelMap: Record<TaskStatus, string> = {
+  todo: "待办",
+  "in-progress": "进行中",
+  done: "已完成",
+};
+
+const priorityLabelMap: Record<Task["priority"], string> = {
+  low: "低",
+  medium: "中",
+  high: "高",
+};
+
+const isStatus = (value: string): value is TaskStatus => {
+  return value === "todo" || value === "in-progress" || value === "done";
+};
+
+function SortableItem({ task }: { task: Task }) {
   const itemRef = useRef<HTMLDivElement | null>(null);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
@@ -87,40 +86,70 @@ function SortableItem({ task }: { task: KanbanTask }) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`touch-none select-none p-5 mb-3 rounded-2xl border bg-white/90 backdrop-blur-md transition-all duration-300 ring-1 ring-white/60
-        ${
-          isDragging
-            ? "border-zinc-400 shadow-xl shadow-zinc-200/50 opacity-95 z-20"
-            : "border-zinc-200/60 hover:border-zinc-300 hover:shadow-lg"
-        }
-      `}
+      className={`touch-none select-none p-5 mb-3 rounded-2xl border bg-white/90 backdrop-blur-md transition-all duration-300 ring-1 ring-white/60 ${
+        isDragging ? "border-zinc-400 shadow-xl shadow-zinc-200/50 opacity-95 z-20" : "border-zinc-200/60 hover:border-zinc-300 hover:shadow-lg"
+      }`}
     >
       <div className="flex justify-between items-start gap-4">
-         <span className="text-zinc-700 font-light leading-relaxed">{task.title}</span>
-         {isDoneTask(task) && (
-           <span className="shrink-0 w-2 h-2 mt-2 rounded-full bg-zinc-800" />
-         )}
+        <div className="min-w-0">
+          <span className="block text-zinc-700 font-light leading-relaxed">{task.title}</span>
+          <span className="mt-2 inline-flex items-center rounded-full bg-zinc-100 px-2.5 py-1 text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+            {priorityLabelMap[task.priority]}
+          </span>
+        </div>
+        {task.status === "done" ? <span className="shrink-0 w-2 h-2 mt-2 rounded-full bg-zinc-800" /> : null}
       </div>
       <div className="mt-4 flex items-center gap-2">
-         <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-zinc-400 bg-zinc-100/50 px-2 py-1 rounded-sm">
-           {task.status === "todo" ? "待办" : task.status === "in-progress" ? "进行中" : "已完成"}
-         </span>
-         {task.status === "in-progress" && (
-           <span className="text-[10px] text-zinc-300 font-mono">处理中</span>
-         )}
+        <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-zinc-400 bg-zinc-100/50 px-2 py-1 rounded-sm">
+          {statusLabelMap[task.status]}
+        </span>
+        {task.status === "in-progress" ? <span className="text-[10px] text-zinc-300 font-mono">处理中</span> : null}
+      </div>
+    </div>
+  );
+}
+
+function TaskColumn({ label, status, tasks }: { label: string; status: TaskStatus; tasks: Task[] }) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
+
+  return (
+    <div className="flex flex-col">
+      <h3 className="text-[11px] font-semibold tracking-[0.2em] uppercase text-zinc-400 mb-6 flex justify-between items-center pb-4 border-b border-zinc-100 border-dashed">
+        {label}
+        <span className="text-zinc-300 font-mono bg-zinc-50 px-2 py-0.5 rounded-sm">{tasks.length}</span>
+      </h3>
+      <div
+        ref={setNodeRef}
+        className={`flex-1 rounded-3xl p-4 min-h-[50vh] border transition-all duration-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${
+          isOver
+            ? "border-zinc-400 bg-white/95"
+            : "border-zinc-200/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.85),rgba(244,244,245,0.6))]"
+        }`}
+      >
+        <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
+          {tasks.length === 0 ? (
+            <div className="flex h-full min-h-[40vh] items-center justify-center rounded-2xl border border-dashed border-zinc-200/70 text-[10px] uppercase tracking-[0.2em] text-zinc-300">
+              拖到这里
+            </div>
+          ) : null}
+          {tasks.map((task) => (
+            <SortableItem key={task.id} task={task} />
+          ))}
+        </SortableContext>
       </div>
     </div>
   );
 }
 
 export default function KanbanPage() {
-  const [tasks, setTasks] = useState<KanbanTask[]>(initialTasks);
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const tasks = useAppStore((state) => state.tasks);
+  const activeTaskId = useAppStore((state) => state.drag.activeTaskId);
+  const startDragging = useAppStore((state) => state.startDragging);
+  const endDragging = useAppStore((state) => state.endDragging);
+  const moveTaskToTask = useAppStore((state) => state.moveTaskToTask);
+  const moveTaskToStatus = useAppStore((state) => state.moveTaskToStatus);
 
-  const activeTask = useMemo(
-    () => tasks.find((task) => task.id === activeTaskId) ?? null,
-    [activeTaskId, tasks]
-  );
+  const activeTask = useMemo(() => tasks.find((task) => task.id === activeTaskId) ?? null, [activeTaskId, tasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -136,30 +165,29 @@ export default function KanbanPage() {
   );
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveTaskId(String(event.active.id));
+    startDragging(String(event.active.id));
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    setActiveTaskId(null);
+    endDragging();
 
-    if (over && active.id !== over.id) {
-      setTasks((items) => {
-        const oldIndex = items.findIndex((i) => i.id === active.id);
-        const newIndex = items.findIndex((i) => i.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+    if (!over || active.id === over.id) {
+      return;
     }
+
+    const overId = String(over.id);
+
+    if (isStatus(overId)) {
+      moveTaskToStatus(String(active.id), overId);
+      return;
+    }
+
+    moveTaskToTask(String(active.id), overId);
   };
 
   const handleDragCancel = () => {
-    setActiveTaskId(null);
-  };
-
-  const columns: Record<string, KanbanTask["status"]> = {
-    "待处理": "todo",
-    "进行中": "in-progress",
-    "已完成": "done",
+    endDragging();
   };
 
   return (
@@ -167,12 +195,8 @@ export default function KanbanPage() {
       <header className="space-y-4">
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
-              看板
-            </h1>
-            <p className="text-zinc-500 font-light text-lg mt-4">
-              拖拽即可调整优先级，让状态流转更直观。
-            </p>
+            <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">看板</h1>
+            <p className="text-zinc-500 font-light text-lg mt-4">拖拽即可调整优先级，让状态流转更直观。</p>
           </div>
           <Link
             href="/tasks/new"
@@ -183,7 +207,6 @@ export default function KanbanPage() {
         </div>
       </header>
 
-      {/* Dnd Context */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -192,26 +215,13 @@ export default function KanbanPage() {
         onDragCancel={handleDragCancel}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-24">
-          {Object.entries(columns).map(([columnName, status]) => {
-             const columnTasks = tasks.filter((t) => t.status === status);
+          {columns.map((column) => {
+            const columnTasks = tasks.filter((task) => task.status === column.status);
 
-             return (
-               <div key={columnName} className="flex flex-col">
-                 <h3 className="text-[11px] font-semibold tracking-[0.2em] uppercase text-zinc-400 mb-6 flex justify-between items-center pb-4 border-b border-zinc-100 border-dashed">
-                   {columnName}
-                   <span className="text-zinc-300 font-mono bg-zinc-50 px-2 py-0.5 rounded-sm">{columnTasks.length}</span>
-                 </h3>
-                 <div className="flex-1 rounded-3xl p-4 min-h-[50vh] border border-zinc-200/70 bg-[linear-gradient(160deg,rgba(255,255,255,0.85),rgba(244,244,245,0.6))] shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                    <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                      {columnTasks.map((task) => (
-                        <SortableItem key={task.id} task={task} />
-                      ))}
-                    </SortableContext>
-                 </div>
-               </div>
-             );
+            return <TaskColumn key={column.status} label={column.label} status={column.status} tasks={columnTasks} />;
           })}
         </div>
+
         <DragOverlay>
           {activeTask ? (
             <div className="p-5 rounded-2xl border border-zinc-300 bg-white/95 backdrop-blur-md ring-1 ring-white/90 shadow-[0_30px_55px_rgba(24,24,27,0.22)]">
