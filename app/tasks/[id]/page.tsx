@@ -34,7 +34,7 @@ function GenericField<T extends string | undefined>({
   options,
 }: FormFieldProps<T>) {
   return (
-    <div className="flex flex-col gap-2 group animate-in slide-in-from-bottom-2 duration-500 fill-mode-both" style={{ animationDelay: \`\${Math.random() * 200}ms\` }}>
+    <div className="flex flex-col gap-2 group animate-in slide-in-from-bottom-2 duration-500 fill-mode-both">
       <label className="text-[10px] font-semibold tracking-[0.2em] uppercase text-zinc-400 group-focus-within:text-zinc-800 transition-colors">
         {label}
       </label>
@@ -102,7 +102,7 @@ export default function EditTaskPage() {
       const formattedErrors: Record<string, string> = {};
       result.error.issues.forEach((issue) => {
         if (issue.path[0]) {
-          formattedErrors[issue.path[0]] = issue.message;
+          formattedErrors[issue.path[0] as string] = issue.message;
         }
       });
       setErrors(formattedErrors);

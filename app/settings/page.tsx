@@ -91,8 +91,8 @@ export default function SettingsPage() {
         <button
           onClick={handleSave}
           disabled={!dirty}
-          className={\`px-6 py-3 rounded-full text-[10px] font-semibold tracking-[0.2em] uppercase transition-all duration-300 
-            \${dirty ? "bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 hover:bg-black scale-105" : "bg-zinc-100 text-zinc-400 cursor-not-allowed"}\`}
+          className={`px-6 py-3 rounded-full text-[10px] font-semibold tracking-[0.2em] uppercase transition-all duration-300 
+            ${dirty ? "bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 hover:bg-black scale-105" : "bg-zinc-100 text-zinc-400 cursor-not-allowed"}`}
         >
           Save Changes
         </button>
@@ -109,11 +109,11 @@ export default function SettingsPage() {
             {["light", "dark", "system"].map((themeOpt) => (
               <button
                 key={themeOpt}
-                onClick={() => updateSettings({ theme: themeOpt as any })}
-                className={\`flex-1 py-3 px-4 rounded-xl text-xs font-mono uppercase tracking-[0.1em] transition-all duration-300
-                  \${settings.theme === themeOpt 
+                onClick={() => updateSettings({ theme: themeOpt as UserSettings["theme"] })}
+                className={`flex-1 py-3 px-4 rounded-xl text-xs font-mono uppercase tracking-[0.1em] transition-all duration-300
+                  ${settings.theme === themeOpt 
                     ? "bg-white text-zinc-900 shadow-sm border border-zinc-200/50" 
-                    : "text-zinc-400 hover:text-zinc-800"}\`}
+                    : "text-zinc-400 hover:text-zinc-800"}`}
               >
                 {themeOpt}
               </button>
@@ -132,10 +132,10 @@ export default function SettingsPage() {
               <label key={key} className="flex items-center justify-between p-4 hover:bg-zinc-50/50 rounded-2xl cursor-pointer group transition-colors">
                 <span className="text-sm font-light text-zinc-700 capitalize group-hover:text-zinc-900">{key} Notifications</span>
                 <div 
-                  className={\`w-12 h-6 rounded-full p-1 transition-colors duration-500 \${settings.notifications[key] ? "bg-zinc-900" : "bg-zinc-200"}\`}
+                  className={`w-12 h-6 rounded-full p-1 transition-colors duration-500 ${settings.notifications[key] ? "bg-zinc-900" : "bg-zinc-200"}`}
                 >
                   <div 
-                    className={\`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm \${settings.notifications[key] ? "translate-x-6" : "translate-x-0"}\`} 
+                    className={`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm ${settings.notifications[key] ? "translate-x-6" : "translate-x-0"}`} 
                   />
                 </div>
                 <input
@@ -158,8 +158,8 @@ export default function SettingsPage() {
           <div className="space-y-1 border border-zinc-100 bg-white/40 backdrop-blur-md rounded-3xl p-2">
             <label className="flex items-center justify-between p-4 hover:bg-zinc-50/50 rounded-2xl cursor-pointer group transition-colors border-b border-zinc-50">
               <span className="text-sm font-light text-zinc-700 group-hover:text-zinc-900">Allow Telemetry</span>
-              <div className={\`w-12 h-6 rounded-full p-1 transition-colors duration-500 \${settings.privacy.telemetry ? "bg-zinc-900" : "bg-zinc-200"}\`}>
-                <div className={\`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm \${settings.privacy.telemetry ? "translate-x-6" : "translate-x-0"}\`} />
+              <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-500 ${settings.privacy.telemetry ? "bg-zinc-900" : "bg-zinc-200"}`}>
+                <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm ${settings.privacy.telemetry ? "translate-x-6" : "translate-x-0"}`} />
               </div>
               <input
                 type="checkbox"
@@ -170,8 +170,8 @@ export default function SettingsPage() {
             </label>
             <label className="flex items-center justify-between p-4 hover:bg-zinc-50/50 rounded-2xl cursor-pointer group transition-colors">
               <span className="text-sm font-light text-zinc-700 group-hover:text-zinc-900">Share Anonymous Data</span>
-              <div className={\`w-12 h-6 rounded-full p-1 transition-colors duration-500 \${settings.privacy.shareData ? "bg-zinc-900" : "bg-zinc-200"}\`}>
-                <div className={\`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm \${settings.privacy.shareData ? "translate-x-6" : "translate-x-0"}\`} />
+              <div className={`w-12 h-6 rounded-full p-1 transition-colors duration-500 ${settings.privacy.shareData ? "bg-zinc-900" : "bg-zinc-200"}`}>
+                <div className={`w-4 h-4 bg-white rounded-full transition-transform duration-500 shadow-sm ${settings.privacy.shareData ? "translate-x-6" : "translate-x-0"}`} />
               </div>
               <input
                 type="checkbox"
