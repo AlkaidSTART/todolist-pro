@@ -59,8 +59,8 @@ export default function DesktopSidebar() {
       <div ref={navRef} className="relative flex flex-col gap-2">
         <div
           ref={indicatorRef}
-          className="absolute left-0 right-0 rounded-xl bg-zinc-900 shadow-[0_10px_30px_rgba(24,24,27,0.24)]"
-          style={{ top: 0, height: 0 }}
+          className="absolute left-0 right-0 rounded-xl shadow-[0_10px_30px_rgba(24,24,27,0.24)]"
+          style={{ backgroundColor: "var(--theme-accent)", top: 0, height: 0 }}
         />
         {navItems.map((item, index) => {
           const active = isActive(pathname, item.href);

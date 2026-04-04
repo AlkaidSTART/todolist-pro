@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import gsap from "gsap";
 
 // Base Settings Type
 type SystemSettings = {
@@ -27,6 +28,40 @@ export type DeepPartial<T> = {
 // Advanced Utility: Omit
 export type UserSettings = Omit<SystemSettings, "dangerZone">;
 
+type ThemePalette = {
+  accent: string;
+  accentSoft: string;
+  bgStart: string;
+  bgEnd: string;
+  surface: string;
+};
+
+type ThemePaletteName = "graphite" | "teal" | "amber";
+
+const themePalettes: Record<ThemePaletteName, ThemePalette> = {
+  graphite: {
+    accent: "#18181b",
+    accentSoft: "#3f3f46",
+    bgStart: "#f8fafc",
+    bgEnd: "#e4e4e7",
+    surface: "#ffffff",
+  },
+  teal: {
+    accent: "#0f766e",
+    accentSoft: "#0d9488",
+    bgStart: "#f0fdfa",
+    bgEnd: "#d1fae5",
+    surface: "#f8fffe",
+  },
+  amber: {
+    accent: "#b45309",
+    accentSoft: "#d97706",
+    bgStart: "#fffbeb",
+    bgEnd: "#fee2e2",
+    surface: "#fffdf8",
+  },
+};
+
 const defaultSettings: UserSettings = {
   theme: "system",
   notifications: {
@@ -43,6 +78,71 @@ const defaultSettings: UserSettings = {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [dirty, setDirty] = useState(false);
+  const [themePalette, setThemePalette] = useState<ThemePaletteName>("graphite");
+  const modeCardRef = useRef<HTMLDivElement | null>(null);
+  const paletteCardRef = useRef<HTMLDivElement | null>(null);
+
+  const selectedPalette = useMemo(() => themePalettes[themePalette], [themePalette]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+
+    const applyMode = () => {
+      if (settings.theme === "system") {
+        root.setAttribute(
+          "data-ui-mode",
+          window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+        );
+      } else {
+        root.setAttribute("data-ui-mode", settings.theme);
+      }
+    };
+
+    applyMode();
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleMedia = () => {
+      if (settings.theme === "system") {
+        applyMode();
+      }
+    };
+
+    media.addEventListener("change", handleMedia);
+    return () => media.removeEventListener("change", handleMedia);
+  }, [settings.theme]);
+
+  useEffect(() => {
+    if (!modeCardRef.current) {
+      return;
+    }
+
+    gsap.fromTo(
+      modeCardRef.current,
+      { y: 4, opacity: 0.88 },
+      { y: 0, opacity: 1, duration: 0.35, ease: "power3.out" }
+    );
+  }, [settings.theme]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    gsap.to(root, {
+      "--theme-accent": selectedPalette.accent,
+      "--theme-accent-soft": selectedPalette.accentSoft,
+      "--theme-bg-start": selectedPalette.bgStart,
+      "--theme-bg-end": selectedPalette.bgEnd,
+      "--theme-surface": selectedPalette.surface,
+      duration: 0.7,
+      ease: "power2.out",
+    });
+
+    if (paletteCardRef.current) {
+      gsap.fromTo(
+        paletteCardRef.current,
+        { scale: 0.985, filter: "saturate(85%)" },
+        { scale: 1, filter: "saturate(100%)", duration: 0.45, ease: "power3.out" }
+      );
+    }
+  }, [selectedPalette]);
 
   // Using DeepPartial to allow partial updates of nested objects
   const updateSettings = (updates: DeepPartial<UserSettings>) => {
@@ -105,7 +205,7 @@ export default function SettingsPage() {
             <h2 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-800">界面</h2>
             <p className="text-sm font-light text-zinc-500">配置界面视觉风格。</p>
           </div>
-          <div className="flex gap-4 p-2 bg-zinc-100/50 rounded-2xl border border-zinc-100">
+          <div ref={modeCardRef} className="flex gap-4 p-2 bg-zinc-100/50 rounded-2xl border border-zinc-100">
             {["light", "dark", "system"].map((themeOpt) => (
               <button
                 key={themeOpt}
@@ -183,6 +283,46 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 items-start">
+          <div className="space-y-2">
+            <h2 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-800">主题色</h2>
+            <p className="text-sm font-light text-zinc-500">切换应用主色与背景氛围，动效由 GSAP 驱动。</p>
+          </div>
+          <div ref={paletteCardRef} className="rounded-3xl border border-zinc-100 p-5 bg-white/60 backdrop-blur-md">
+            <div className="grid grid-cols-3 gap-3">
+              {(Object.keys(themePalettes) as ThemePaletteName[]).map((name) => {
+                const palette = themePalettes[name];
+                const active = themePalette === name;
+
+                return (
+                  <button
+                    key={name}
+                    onClick={() => {
+                      setThemePalette(name);
+                      setDirty(true);
+                    }}
+                    className={`rounded-2xl border px-3 py-3 text-left transition-all duration-300 ${
+                      active ? "border-zinc-300 shadow-md" : "border-zinc-200/70 hover:border-zinc-300"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: palette.accent }} />
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: palette.accentSoft }} />
+                    </div>
+                    <div className="text-[11px] uppercase tracking-[0.16em] font-semibold text-zinc-600">
+                      {name === "graphite" ? "石墨" : name === "teal" ? "青绿" : "琥珀"}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-4 p-4 rounded-2xl border border-zinc-100 bg-white/70">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 mb-3">预览</div>
+              <div className="h-14 rounded-xl" style={{ background: `linear-gradient(135deg, ${selectedPalette.bgStart}, ${selectedPalette.bgEnd})` }} />
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Excluded Danger Zone visually represented as not accessible in UserSettings */}

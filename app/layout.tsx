@@ -27,9 +27,9 @@ export default function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-zinc-50 text-zinc-900`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex text-sm bg-[radial-gradient(circle_at_top_right,rgba(212,212,216,0.25),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.2),transparent_45%)]">
+      <body className="min-h-full flex text-sm">
         <DesktopSidebar />
 
         <main className="flex-1 ml-0 md:ml-64 px-5 pt-6 pb-28 md:p-12 lg:p-24 max-w-6xl">

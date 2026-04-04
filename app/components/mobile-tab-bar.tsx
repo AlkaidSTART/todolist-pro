@@ -61,8 +61,8 @@ export default function MobileTabBar() {
       >
         <div
           ref={indicatorRef}
-          className="absolute top-1/2 -translate-y-1/2 left-0 h-10 rounded-xl bg-zinc-900 shadow-[0_8px_22px_rgba(24,24,27,0.22)]"
-          style={{ width: 0 }}
+          className="absolute top-1/2 -translate-y-1/2 left-0 h-10 rounded-xl shadow-[0_8px_22px_rgba(24,24,27,0.22)]"
+          style={{ width: 0, backgroundColor: "var(--theme-accent)" }}
         />
         <ul className="relative z-10 h-full grid grid-cols-3 px-2">
           {tabs.map((tab, index) => {
