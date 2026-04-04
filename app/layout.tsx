@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,9 +32,9 @@ export default function RootLayout({
         <aside className="w-64 border-r border-zinc-200/60 bg-white/50 backdrop-blur-xl p-8 flex flex-col gap-8 fixed inset-y-0 left-0">
           <div className="font-semibold tracking-widest uppercase text-xs text-zinc-400">Todo Pro.</div>
           <nav className="flex flex-col gap-3">
-            <a href="/" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Overview</a>
-            <a href="/tasks" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Kanban</a>
-            <a href="/settings" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Settings</a>
+            <Link href="/" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Overview</Link>
+            <Link href="/tasks" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Kanban</Link>
+            <Link href="/settings" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Settings</Link>
           </nav>
         </aside>
         <main className="flex-1 ml-64 p-12 lg:p-24 max-w-6xl">

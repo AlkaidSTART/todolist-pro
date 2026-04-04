@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { z } from "zod";
 
@@ -116,9 +117,9 @@ export default function EditTaskPage() {
   return (
     <div className="flex flex-col gap-12 max-w-2xl w-full pt-8 pb-32 min-h-screen">
       <header className="space-y-4">
-        <a href="/tasks" className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-800 transition-colors inline-block mb-8">
+        <Link href="/tasks" className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-800 transition-colors inline-block mb-8">
           ← Back to Kanban
-        </a>
+        </Link>
         <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
           Edit Task
         </h1>

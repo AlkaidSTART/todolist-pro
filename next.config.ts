@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
-  output: 'export',
-  distDir: 'dist',
-  basePath: '/todolist-pro',
-  assetPrefix: '/todolist-pro/',
+  distDir: "dist",
+  basePath: isProd ? "/todolist-pro" : "",
+  assetPrefix: isProd ? "/todolist-pro/" : "",
   images: {
     unoptimized: true,
   },

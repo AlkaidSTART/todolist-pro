@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   DndContext,
   closestCenter,
@@ -124,12 +125,12 @@ export default function KanbanPage() {
               Orchestrate your workflow. Move items to denote progress.
             </p>
           </div>
-          <a
+          <Link
             href="/tasks/new"
             className="hidden sm:flex text-xs font-semibold tracking-[0.15em] uppercase px-6 py-3 bg-zinc-900 text-white rounded-full hover:bg-zinc-800 transition-colors"
           >
             + New Task
-          </a>
+          </Link>
         </div>
       </header>
 
