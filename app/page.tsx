@@ -17,11 +17,11 @@ type Task = {
 
 // Mock data
 const mockTasks: Task[] = [
-  { id: "1", title: "Review Q3 Roadmaps", category: "Work", completed: true },
-  { id: "2", title: "Design System Tokens", category: "Work", completed: false },
-  { id: "3", title: "Weekly Grocery Run", category: "Personal", completed: true },
-  { id: "4", title: "Gym Session", category: "Health", completed: false },
-  { id: "5", title: "Read Clean Architecture", category: "Personal", completed: false },
+  { id: "1", title: "评审 Q3 路线图", category: "工作", completed: true },
+  { id: "2", title: "完善设计系统变量", category: "工作", completed: false },
+  { id: "3", title: "本周采购清单", category: "生活", completed: true },
+  { id: "4", title: "晚间训练计划", category: "健康", completed: false },
+  { id: "5", title: "阅读《架构整洁之道》", category: "生活", completed: false },
 ];
 
 export default function OverviewPage() {
@@ -43,10 +43,10 @@ export default function OverviewPage() {
     <div className="flex flex-col gap-12 sm:gap-16 lg:pr-16 max-w-4xl mx-auto w-full pt-8 min-h-screen animate-in fade-in duration-1000">
       <header className="space-y-4">
         <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
-          Overview
+          总览
         </h1>
         <p className="text-zinc-500 font-light text-lg">
-          A high-level glance at your productivity landscape.
+          用一眼可读的方式，掌握当日任务进展。
         </p>
       </header>
 
@@ -87,7 +87,7 @@ export default function OverviewPage() {
       {/* Array Processing: Filtering and Mapping */}
       <section className="mt-12">
         <h3 className="text-xs font-semibold tracking-[0.2em] uppercase text-zinc-400 mb-6">
-          Pending Highlights
+          待办聚焦
         </h3>
         <ul className="flex flex-col gap-1">
           {mockTasks

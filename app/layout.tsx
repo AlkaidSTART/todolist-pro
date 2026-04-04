@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import DesktopSidebar from "./components/desktop-sidebar";
+import MobileTabBar from "./components/mobile-tab-bar";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Todo Pro",
-  description: "Minimalist task management",
+  title: "Todo Pro 任务管理",
+  description: "简约高级的任务协作看板",
 };
 
 export default function RootLayout({
@@ -25,21 +26,17 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="zh-CN"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-zinc-50 text-zinc-900`}
     >
-      <body className="min-h-full flex text-sm">
-        <aside className="w-64 border-r border-zinc-200/60 bg-white/50 backdrop-blur-xl p-8 flex flex-col gap-8 fixed inset-y-0 left-0">
-          <div className="font-semibold tracking-widest uppercase text-xs text-zinc-400">Todo Pro.</div>
-          <nav className="flex flex-col gap-3">
-            <Link href="/" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Overview</Link>
-            <Link href="/tasks" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Kanban</Link>
-            <Link href="/settings" className="text-zinc-500 hover:text-zinc-900 transition-colors duration-300">Settings</Link>
-          </nav>
-        </aside>
-        <main className="flex-1 ml-64 p-12 lg:p-24 max-w-6xl">
+      <body className="min-h-full flex text-sm bg-[radial-gradient(circle_at_top_right,rgba(212,212,216,0.25),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(161,161,170,0.2),transparent_45%)]">
+        <DesktopSidebar />
+
+        <main className="flex-1 ml-0 md:ml-64 px-5 pt-6 pb-28 md:p-12 lg:p-24 max-w-6xl">
           {children}
         </main>
+
+        <MobileTabBar />
       </body>
     </html>
   );

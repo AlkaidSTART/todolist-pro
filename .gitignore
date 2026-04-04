@@ -45,3 +45,4 @@ next-env.d.ts
 dist/dev/trace
 dist/dev/cache/turbopack/8d0f77bfa/CURRENT
 dist/dev/cache/turbopack/8d0f77bfa/LOG
+pnpm-lock.yaml

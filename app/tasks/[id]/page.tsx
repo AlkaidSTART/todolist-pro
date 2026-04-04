@@ -7,8 +7,8 @@ import { z } from "zod";
 
 // Zod Schema
 const taskSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(100),
-  description: z.string().max(500, "Limit description to 500 characters").optional(),
+  title: z.string().min(3, "标题至少 3 个字符").max(100),
+  description: z.string().max(500, "描述最多 500 个字符").optional(),
   priority: z.enum(["low", "medium", "high"]),
   dueDate: z.string().datetime().optional(),
 });
@@ -110,7 +110,7 @@ export default function EditTaskPage() {
     } else {
       setErrors({});
       console.log("Saved validated data:", result.data);
-      alert("Changes saved to Drafts. Check console for output.");
+      alert("已保存到草稿，控制台可查看提交数据。");
     }
   };
 
@@ -118,26 +118,26 @@ export default function EditTaskPage() {
     <div className="flex flex-col gap-12 max-w-2xl w-full pt-8 pb-32 min-h-screen">
       <header className="space-y-4">
         <Link href="/tasks" className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 hover:text-zinc-800 transition-colors inline-block mb-8">
-          ← Back to Kanban
+          ← 返回看板
         </Link>
         <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
-          Edit Task
+          编辑任务
         </h1>
         <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.2em]">
-          ID: {id}
+          任务 ID: {id}
         </p>
       </header>
 
       <form onSubmit={handleSave} className="space-y-8 bg-white p-8 sm:p-12 rounded-[2rem] border border-zinc-100 shadow-2xl shadow-zinc-200/20">
         <GenericField<string>
-          label="Title"
+          label="标题"
           value={formData.title}
           onChange={(val) => setFormData({ ...formData, title: val })}
           error={errors.title}
         />
 
         <GenericField<string | undefined>
-          label="Description"
+          label="描述"
           type="textarea"
           value={formData.description}
           onChange={(val) => setFormData({ ...formData, description: val })}
@@ -146,20 +146,20 @@ export default function EditTaskPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           <GenericField<string>
-            label="Priority"
+            label="优先级"
             type="select"
             value={formData.priority}
             onChange={(val) => setFormData({ ...formData, priority: val as "low"|"medium"|"high" })}
             options={[
-              { label: "Low Priority", value: "low" },
-              { label: "Medium Priority", value: "medium" },
-              { label: "High Priority", value: "high" },
+              { label: "低", value: "low" },
+              { label: "中", value: "medium" },
+              { label: "高", value: "high" },
             ]}
             error={errors.priority}
           />
           
           <GenericField<string | undefined>
-            label="Due Date"
+            label="截止时间"
             type="date"
             value={formData.dueDate}
             onChange={(val) => setFormData({ ...formData, dueDate: val })}
@@ -172,13 +172,13 @@ export default function EditTaskPage() {
              type="button" 
              className="px-8 py-4 rounded-full text-xs font-semibold tracking-[0.15em] uppercase text-zinc-500 hover:bg-zinc-50 transition-colors"
            >
-             Discard
+             取消
            </button>
            <button 
              type="submit"
              className="px-8 py-4 rounded-full text-xs font-semibold tracking-[0.15em] uppercase bg-zinc-900 text-white hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/20"
            >
-             Save Changes
+             保存修改
            </button>
         </div>
       </form>

@@ -38,10 +38,10 @@ export const isDoneTask = (task: KanbanTask): task is DoneTask => {
 };
 
 const initialTasks: KanbanTask[] = [
-  { id: "t1", title: "Define Brand Architecture", status: "todo" },
-  { id: "t2", title: "Review Contrast Ratios", status: "todo" },
-  { id: "t3", title: "Implement Auth Flow", status: "in-progress", startedAt: Date.now() },
-  { id: "t4", title: "Typography Polish", status: "done", completedAt: Date.now() - 86400000 },
+  { id: "t1", title: "定义品牌视觉结构", status: "todo" },
+  { id: "t2", title: "校验对比度可读性", status: "todo" },
+  { id: "t3", title: "实现登录鉴权流程", status: "in-progress", startedAt: Date.now() },
+  { id: "t4", title: "微调标题排印系统", status: "done", completedAt: Date.now() - 86400000 },
 ];
 
 function SortableItem({ task }: { task: KanbanTask }) {
@@ -76,10 +76,10 @@ function SortableItem({ task }: { task: KanbanTask }) {
       </div>
       <div className="mt-4 flex items-center gap-2">
          <span className="text-[9px] uppercase tracking-[0.2em] font-mono text-zinc-400 bg-zinc-100/50 px-2 py-1 rounded-sm">
-           {task.status}
+           {task.status === "todo" ? "待办" : task.status === "in-progress" ? "进行中" : "已完成"}
          </span>
          {task.status === "in-progress" && (
-           <span className="text-[10px] text-zinc-300 font-mono">Working</span>
+           <span className="text-[10px] text-zinc-300 font-mono">处理中</span>
          )}
       </div>
     </div>
@@ -108,9 +108,9 @@ export default function KanbanPage() {
   };
 
   const columns: Record<string, KanbanTask["status"]> = {
-    "Pending": "todo",
-    "In Progress": "in-progress",
-    "Completed": "done",
+    "待处理": "todo",
+    "进行中": "in-progress",
+    "已完成": "done",
   };
 
   return (
@@ -119,17 +119,17 @@ export default function KanbanPage() {
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-4xl lg:text-5xl font-extralight tracking-tight text-zinc-900">
-              Kanban
+              看板
             </h1>
             <p className="text-zinc-500 font-light text-lg mt-4">
-              Orchestrate your workflow. Move items to denote progress.
+              拖拽即可调整优先级，让状态流转更直观。
             </p>
           </div>
           <Link
             href="/tasks/new"
             className="hidden sm:flex text-xs font-semibold tracking-[0.15em] uppercase px-6 py-3 bg-zinc-900 text-white rounded-full hover:bg-zinc-800 transition-colors"
           >
-            + New Task
+            + 新建任务
           </Link>
         </div>
       </header>
