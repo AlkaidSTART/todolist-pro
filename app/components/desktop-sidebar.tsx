@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import gsap from "gsap";
+import { useAppStore, themePaletteNames } from "@/lib/app-store";
 
 type NavItem = {
   label: string;
@@ -28,6 +29,14 @@ export default function DesktopSidebar() {
   const navRef = useRef<HTMLDivElement | null>(null);
   const indicatorRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const setPalette = useAppStore((state) => state.setPalette);
+  const currentPalette = useAppStore((state) => state.settings.palette);
+
+  const handleThemeToggle = () => {
+    const currentIndex = themePaletteNames.indexOf(currentPalette);
+    const nextIndex = (currentIndex + 1) % themePaletteNames.length;
+    setPalette(themePaletteNames[nextIndex]);
+  };
 
   useEffect(() => {
     const navEl = navRef.current;
@@ -79,6 +88,15 @@ export default function DesktopSidebar() {
             </Link>
           );
         })}
+      </div>
+      <div className="mt-auto">
+        <button
+          onClick={handleThemeToggle}
+          className="w-full h-11 px-4 rounded-xl text-[11px] tracking-[0.16em] uppercase font-semibold flex items-center justify-center gap-2 transition-colors duration-300 bg-white border border-zinc-200/70 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300"
+        >
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--theme-accent)" }} />
+          切换主题
+        </button>
       </div>
     </aside>
   );
