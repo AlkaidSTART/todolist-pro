@@ -216,6 +216,12 @@ export interface AppStateData {
   taskDraft: TaskDraft;
   settings: UserSettings;
   drag: DragState;
+  importStatus: {
+    isImporting: boolean;
+    progress: number;
+    error: string | null;
+    lastImport: number | null;
+  };
 }
 
 export interface AppStateActions {
@@ -235,6 +241,8 @@ export interface AppStateActions {
   permanentlyDeleteTask: (taskId: string) => void;
   startDragging: (taskId: string) => void;
   endDragging: () => void;
+  importFeishuEvents: (events: Array<{summary: string; description: string; start_time: number; end_time: number}>) => Promise<number>;
+  setImportStatus: (status: Partial<AppStateData['importStatus']>) => void;
 }
 
 export type AppState = AppStateData & AppStateActions;
@@ -314,6 +322,12 @@ export const useAppStore = create<AppState>()(
       taskDraft: createTaskDraft(),
       settings: defaultSettings,
       drag: { activeTaskId: null },
+      importStatus: {
+        isImporting: false,
+        progress: 0,
+        error: null,
+        lastImport: null,
+      },
       setTheme: (theme) =>
         set((state) => ({
           settings: {
@@ -466,6 +480,54 @@ export const useAppStore = create<AppState>()(
         })),
       startDragging: (taskId) => set({ drag: { activeTaskId: taskId } }),
       endDragging: () => set({ drag: { activeTaskId: null } }),
+      importFeishuEvents: async (events) => {
+        set({ importStatus: { isImporting: true, progress: 0, error: null, lastImport: null } });
+        
+        let importedCount = 0;
+        const totalEvents = events.length;
+        
+        for (let i = 0; i < totalEvents; i++) {
+          const event = events[i];
+          const taskId = createId();
+          
+          set((state) => ({
+            tasks: [
+              {
+                id: taskId,
+                title: event.summary,
+                description: event.description || '',
+                priority: 'medium',
+                dueDate: new Date(event.end_time * 1000).toISOString().split('T')[0],
+                status: 'todo',
+              },
+              ...state.tasks,
+            ],
+            importStatus: {
+              ...state.importStatus,
+              progress: Math.round((i + 1) / totalEvents * 100),
+            },
+          }));
+          
+          importedCount++;
+        }
+        
+        set((state) => ({
+          importStatus: {
+            ...state.importStatus,
+            isImporting: false,
+            lastImport: Date.now(),
+          },
+        }));
+        
+        return importedCount;
+      },
+      setImportStatus: (status) =>
+        set((state) => ({
+          importStatus: {
+            ...state.importStatus,
+            ...status,
+          },
+        })),
     }),
     {
       name: "todolist-pro-state",
